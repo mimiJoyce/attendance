@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Trainee Check-In/Out</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <base target="_top">
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; background-color: #f9f9f9; }
+    .form-container {
+      max-width: 500px;
+      margin: auto;
+      background-color: #fff;
+      padding: 25px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    h2 { text-align: center; color: #007acc; }
+    label { margin-top: 15px; display: block; font-weight: bold; }
+    input, select {
+      width: 100%; padding: 10px; margin-top: 5px;
+      border: 1px solid #ccc; border-radius: 5px;
+    }
+    button {
+      width: 100%; padding: 12px; margin-top: 20px;
+      background-color: #007acc; color: white;
+      border: none; border-radius: 5px; font-size: 16px;
+    }
+    .message { margin-top: 20px; text-align: center; font-weight: bold; color: green; }
+    .footer { text-align: center; font-size: 12px; margin-top: 30px; color: #777; }
+  </style>
+</head>
+<body>
+  <div class="form-container">
+    <h2>Trainee Attendance</h2>
+    <form id="attendanceForm">
+      <label for="name">Full Name</label>
+      <input list="nameSuggestions" id="name" name="name" placeholder="Start typing your name..." required>
+      <datalist id="nameSuggestions"></datalist>
+
+      <label for="action">Action Type</label>
+      <select id="action" name="action" required>
+        <option value="">-- Select Action --</option>
+        <option value="Check-In">Check-In</option>
+        <option value="Check-Out">Check-Out</option>
+      </select>
+
+      <button type="submit">Submit Attendance</button>
+    </form>
+    <div class="message" id="message"></div>
+  </div>
+
+  <div class="footer">Powered by JoyceMimi Digital Transformation Program</div>
+
+  <script>
+    const scriptURL = "YOUR_DEPLOYED_WEBAPP_URL_HERE";
+
+    const nameInput = document.getElementById("name");
+    const datalist = document.getElementById("nameSuggestions");
+
+    nameInput.addEventListener("input", () => {
+      const query = nameInput.value;
+      if (query.length >= 2) {
+        fetch(scriptURL + `?q=${encodeURIComponent(query)}`)
+          .then(res => res.json())
+          .then(data => {
+            datalist.innerHTML = "";
+            data.forEach(name => {
+              const option = document.createElement("option");
+              option.value = name;
+              datalist.appendChild(option);
+            });
+          });
+      }
+    });
+
+    document.getElementById("attendanceForm").addEventListener("submit", function (e) {
+      e.preventDefault();
+      const formData = new FormData(this);
+      fetch(scriptURL, {
+        method: "POST",
+        body: formData
+      })
+        .then(res => res.text())
+        .then(msg => {
+          document.getElementById("message").innerText = msg;
+          this.reset();
+        })
+        .catch(() => {
+          document.getElementById("message").innerText = "❌ Submission failed.";
+        });
+    });
+  </script>
+</body>
+</html>
